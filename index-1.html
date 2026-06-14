@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="pt-BR" translate="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google" content="notranslate">
+<title>SIGCORJ — Gestão de Frotas</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800;900&family=Barlow+Condensed:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0a1628;--navy-mid:#0f2044;--navy-light:#1a3260;
+  --blue:#1a9fe0;--blue-bright:#2dbfff;
+  --white:#ffffff;--gray-2:#c8dcea;--gray-3:#7ea8c4;
+  --green:#00d68f;--orange:#ff9f43;--red:#ff4757;
+  --radius:14px;--radius-sm:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Barlow',sans-serif;background:var(--navy);color:var(--white);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+*{scrollbar-width:thin;scrollbar-color:rgba(100,130,160,0.2) transparent}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:rgba(45,191,255,0.25);border-radius:10px}
+
+/* ── BACKGROUND ── */
+body::before{content:'';position:fixed;top:-30%;right:-20%;width:80vw;height:80vw;background:radial-gradient(circle,rgba(26,159,224,0.06) 0%,transparent 65%);pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;bottom:-20%;left:-10%;width:60vw;height:60vw;background:radial-gradient(circle,rgba(168,85,247,0.04) 0%,transparent 65%);pointer-events:none;z-index:0}
+
+/* ── AUTH CARD ── */
+.auth-wrapper{position:relative;z-index:1;width:100%;max-width:420px}
+.auth-card{background:var(--navy-mid);border:1px solid rgba(26,159,224,0.15);border-radius:20px;padding:40px 36px;box-shadow:0 32px 80px rgba(0,0,0,0.5)}
+
+/* LOGO */
+.auth-logo{text-align:center;margin-bottom:32px}
+.logo-icon-wrap{width:68px;height:68px;background:linear-gradient(135deg,var(--blue),var(--blue-bright));border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;box-shadow:0 8px 24px rgba(26,159,224,0.35)}
+.auth-logo h1{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;letter-spacing:2px;color:var(--white)}
+.auth-logo p{font-size:12px;color:var(--gray-3);margin-top:4px;line-height:1.4}
+
+/* TABS */
+.auth-tabs{display:flex;background:rgba(255,255,255,0.04);border-radius:10px;padding:3px;margin-bottom:28px;gap:3px}
+.auth-tab{flex:1;padding:9px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.5px;cursor:pointer;border-radius:8px;transition:all .2s;color:var(--gray-3)}
+.auth-tab.active{background:var(--blue);color:var(--white);box-shadow:0 4px 12px rgba(26,159,224,0.3)}
+
+/* PANELS */
+.auth-panel{display:none}
+.auth-panel.show{display:block}
+
+/* FORM */
+.form-group{margin-bottom:18px}
+.form-label{display:block;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gray-3);margin-bottom:8px}
+.form-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(26,159,224,0.18);border-radius:10px;padding:13px 16px;font-family:'Barlow',sans-serif;font-size:14px;color:var(--white);outline:none;transition:border-color .2s,background .2s}
+.form-input:focus{border-color:var(--blue-bright);background:rgba(26,159,224,0.06)}
+.form-input::placeholder{color:var(--gray-3)}
+
+/* BUTTON */
+.btn-auth{width:100%;background:linear-gradient(135deg,var(--blue),var(--blue-bright));color:var(--white);border:none;padding:14px;border-radius:10px;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;letter-spacing:1px;cursor:pointer;transition:opacity .2s,transform .15s;margin-top:6px;box-shadow:0 6px 20px rgba(26,159,224,0.3)}
+.btn-auth:hover{opacity:.92;transform:translateY(-1px)}
+.btn-auth:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* FORGOT */
+.forgot-link{text-align:right;margin-top:-10px;margin-bottom:18px}
+.forgot-link a{font-size:12px;color:var(--blue-bright);text-decoration:none;cursor:pointer}
+.forgot-link a:hover{text-decoration:underline}
+
+/* ALERT */
+.auth-alert{padding:11px 14px;border-radius:8px;font-size:13px;font-weight:500;margin-bottom:16px;display:none;align-items:center;gap:8px}
+.auth-alert.show{display:flex}
+.auth-alert.error{background:rgba(255,71,87,0.08);border:1px solid rgba(255,71,87,0.25);color:var(--red)}
+.auth-alert.success{background:rgba(0,214,143,0.08);border:1px solid rgba(0,214,143,0.25);color:var(--green)}
+
+/* DIVIDER */
+.auth-divider{text-align:center;margin:20px 0;position:relative}
+.auth-divider::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(26,159,224,0.1)}
+.auth-divider span{background:var(--navy-mid);padding:0 12px;font-size:11px;color:var(--gray-3);position:relative;letter-spacing:1px}
+
+/* FOOTER */
+.auth-footer{text-align:center;margin-top:24px;font-size:11px;color:var(--gray-3)}
+
+/* ── DASHBOARD (shown after login) ── */
+#dashboardApp{display:none;width:100%;min-height:100vh}
+
+/* ── APP LAYOUT ── */
+.app-wrap{display:flex;min-height:100vh}
+.app-sidebar{width:260px;background:var(--navy-mid);border-right:1px solid rgba(26,159,224,0.12);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100}
+.app-main{margin-left:260px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+/* SIDEBAR HEADER */
+.sidebar-head{padding:20px 18px 16px;border-bottom:1px solid rgba(26,159,224,0.1);display:flex;align-items:center;gap:10px;cursor:pointer}
+.sidebar-head:hover{opacity:.85}
+.s-logo{width:36px;height:36px;background:linear-gradient(135deg,var(--blue),var(--blue-bright));border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.s-logo-text span:first-child{display:block;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;color:var(--blue-bright);letter-spacing:1.5px}
+.s-logo-text span:last-child{display:block;font-size:8px;color:var(--gray-3);letter-spacing:2px;text-transform:uppercase}
+
+/* USER CARD in sidebar */
+.user-card{margin:12px 10px;background:rgba(26,159,224,0.06);border:1px solid rgba(26,159,224,0.12);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.user-avatar{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--navy-light));display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;flex-shrink:0}
+.user-info span:first-child{display:block;font-size:12px;font-weight:700;color:var(--white)}
+.user-info span:last-child{display:block;font-size:10px;color:var(--gray-3);margin-top:1px}
+
+/* SIDEBAR NAV */
+.s-section{margin:8px 10px 0;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:10px;overflow:hidden}
+.s-section-label{font-size:8px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--gray-3);padding:10px 14px 4px}
+.s-item{display:flex;align-items:center;gap:9px;padding:10px 14px;cursor:pointer;transition:background .15s;font-size:13px;color:var(--gray-2);font-weight:500;border-radius:8px;margin:1px 4px}
+.s-item:hover{background:rgba(26,159,224,0.08);color:var(--white)}
+.s-item.active{background:rgba(26,159,224,0.15);color:var(--blue-bright);font-weight:600}
+.s-item-icon{font-size:16px;flex-shrink:0;width:20px;text-align:center}
+
+/* LOGOUT */
+.s-logout{margin:auto 10px 12px;background:rgba(255,71,87,0.06);border:1px solid rgba(255,71,87,0.15);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:9px;cursor:pointer;color:var(--red);font-size:13px;font-weight:600;transition:background .2s}
+.s-logout:hover{background:rgba(255,71,87,0.12)}
+
+/* TOPBAR */
+.app-topbar{background:rgba(15,32,68,0.97);border-bottom:1px solid rgba(26,159,224,0.1);padding:0 28px;height:62px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:90}
+.topbar-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;letter-spacing:.3px}
+.topbar-sub{font-size:12px;color:var(--gray-3)}
+.period-pill{background:rgba(26,159,224,0.1);border:1px solid rgba(26,159,224,0.2);color:var(--blue-bright);padding:5px 12px;border-radius:16px;font-size:11px;font-weight:700;letter-spacing:1px}
+
+/* CONTENT */
+.app-content{padding:28px;flex:1}
+
+/* UPLOAD CARD */
+.upload-module{background:var(--navy-mid);border:1px solid rgba(26,159,224,0.12);border-radius:var(--radius);padding:0;overflow:hidden}
+.upload-module-head{padding:16px 20px;border-bottom:1px solid rgba(26,159,224,0.08);display:flex;align-items:center;justify-content:space-between}
+.upload-module-head h3{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--gray-2)}
+.btn-upload{display:flex;align-items:center;gap:7px;background:var(--blue);color:var(--white);border:none;padding:9px 18px;border-radius:var(--radius-sm);font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:background .2s}
+.btn-upload:hover{background:var(--blue-bright)}
+
+/* EMPTY */
+.module-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center;gap:14px}
+.module-empty-icon{width:64px;height:64px;border-radius:16px;border:1.5px solid rgba(255,255,255,0.12);background:rgba(26,159,224,0.06);display:flex;align-items:center;justify-content:center;font-size:26px}
+.module-empty h4{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700}
+.module-empty p{font-size:13px;color:var(--gray-3);max-width:320px;line-height:1.6}
+
+/* DROP ZONE */
+.drop-zone{border:2px dashed rgba(26,159,224,0.25);border-radius:10px;padding:28px;margin:16px 20px 20px;cursor:pointer;transition:all .2s;text-align:center}
+.drop-zone:hover{border-color:var(--blue-bright);background:rgba(26,159,224,0.05)}
+.drop-zone strong{display:block;font-size:13px;color:var(--blue-bright);font-weight:600;margin-bottom:4px}
+.drop-zone p{font-size:12px;color:var(--gray-3)}
+
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.kpi-card{background:var(--navy-mid);border:1px solid rgba(26,159,224,0.1);border-radius:var(--radius);padding:18px 20px;position:relative;overflow:hidden}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi-card.blue::before{background:linear-gradient(90deg,var(--blue),var(--blue-bright))}
+.kpi-card.green::before{background:linear-gradient(90deg,#00b877,var(--green))}
+.kpi-card.orange::before{background:linear-gradient(90deg,#e87c1e,var(--orange))}
+.kpi-card.red::before{background:linear-gradient(90deg,#e03042,var(--red))}
+.kpi-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gray-3);margin-bottom:8px}
+.kpi-value{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;line-height:1;margin-bottom:4px}
+.kpi-sub{font-size:11px;color:var(--gray-3)}
+.kpi-icon{position:absolute;right:16px;top:16px;font-size:32px;opacity:.1}
+
+/* TABLE */
+.table-card{background:var(--navy-mid);border:1px solid rgba(26,159,224,0.1);border-radius:var(--radius);overflow:hidden;margin-bottom:22px}
+.table-head-bar{padding:14px 20px;border-bottom:1px solid rgba(26,159,224,0.08);display:flex;align-items:center;justify-content:space-between}
+.table-head-bar h3{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--gray-2)}
+.search-box{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(26,159,224,0.12);border-radius:6px;padding:6px 12px}
+.search-box input{background:none;border:none;outline:none;color:var(--white);font-family:'Barlow',sans-serif;font-size:12px;width:160px}
+.search-box input::placeholder{color:var(--gray-3)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{padding:10px 16px;text-align:left;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gray-3);background:rgba(10,22,40,0.4);border-bottom:1px solid rgba(26,159,224,0.06)}
+tbody tr{border-bottom:1px solid rgba(26,159,224,0.05);transition:background .15s}
+tbody tr:hover{background:rgba(26,159,224,0.05)}
+tbody td{padding:12px 16px;color:var(--white)}
+.driver-name{display:flex;align-items:center;gap:10px;font-weight:600}
+.driver-av{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--navy-light));display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;flex-shrink:0}
+.pill{display:inline-block;padding:3px 8px;border-radius:16px;font-size:11px;font-weight:700}
+.pill-blue{background:rgba(26,159,224,0.12);color:var(--blue-bright)}
+.pill-green{background:rgba(0,214,143,0.1);color:var(--green)}
+.num{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700}
+
+/* HOME PANEL */
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
+.home-card{background:var(--navy-mid);border:1px solid rgba(255,255,255,0.07);border-radius:var(--radius);overflow:hidden}
+.home-card-head{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:space-between}
+.home-card-body{padding:16px}
+
+/* SECTION TITLE */
+.section-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gray-2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:1px;background:rgba(26,159,224,0.1)}
+
+/* ALERT */
+.app-alert{display:none;align-items:center;gap:10px;padding:10px 16px;border-radius:var(--radius-sm);margin-bottom:18px;font-size:13px;font-weight:500}
+.app-alert.show{display:flex}
+.app-alert.error{background:rgba(255,71,87,0.08);border:1px solid rgba(255,71,87,0.2);color:var(--red)}
+.app-alert.success{background:rgba(0,214,143,0.08);border:1px solid rgba(0,214,143,0.2);color:var(--green)}
+
+/* LOADING */
+.loading-screen{position:fixed;inset:0;background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:16px}
+.loading-screen.hide{display:none}
+.spinner{width:40px;height:40px;border:3px solid rgba(26,159,224,0.15);border-top-color:var(--blue-bright);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* FORGOT PANEL */
+.forgot-panel{display:none}
+.forgot-panel.show{display:block}
+.back-link{display:flex;align-items:center;gap:6px;color:var(--blue-bright);font-size:13px;cursor:pointer;margin-bottom:20px;font-weight:600}
+.back-link:hover{text-decoration:underline}
+
+@media(max-width:768px){
+  .app-sidebar{transform:translateX(-100%)}
+  .app-main{margin-left:0}
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .home-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="spinner"></div>
+  <p style="color:var(--gray-3);font-size:13px">Carregando SIGCORJ...</p>
+</div>
+
+<!-- ═══ AUTH ═══ -->
+<div class="auth-wrapper" id="authApp">
+  <div class="auth-card">
+
+    <!-- LOGO -->
+    <div class="auth-logo">
+      <div class="logo-icon-wrap">
+        <svg width="36" height="36" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <rect x="15" y="15" width="70" height="70" rx="12" transform="rotate(45 50 50)" fill="white" fill-opacity=".15"/>
+          <rect x="22" y="22" width="56" height="56" rx="8" transform="rotate(45 50 50)" fill="white" fill-opacity=".08"/>
+          <polygon points="72,50 50,28 50,40 28,40 28,60 50,60 50,72" fill="white"/>
+        </svg>
+      </div>
+      <h1>SIGCORJ</h1>
+      <p>Sistema Integrado de Governança<br>e Controle de Jornada</p>
+    </div>
+
+    <!-- ALERT -->
+    <div class="auth-alert" id="authAlert"></div>
+
+    <!-- TABS -->
+    <div class="auth-tabs" id="authTabs">
+      <div class="auth-tab active" onclick="switchTab('login')">Entrar</div>
+      <div class="auth-tab" onclick="switchTab('register')">Criar Conta</div>
+    </div>
+
+    <!-- LOGIN PANEL -->
+    <div class="auth-panel show" id="panelLogin">
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input type="email" class="form-input" id="loginEmail" placeholder="seu@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <input type="password" class="form-input" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <div class="forgot-link"><a onclick="showForgot()">Esqueceu a senha?</a></div>
+      <button class="btn-auth" onclick="doLogin()">Entrar</button>
+    </div>
+
+    <!-- REGISTER PANEL -->
+    <div class="auth-panel" id="panelRegister">
+      <div class="form-group">
+        <label class="form-label">Nome Completo</label>
+        <input type="text" class="form-input" id="regNome" placeholder="Seu nome">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Empresa</label>
+        <input type="text" class="form-input" id="regEmpresa" placeholder="Nome da empresa">
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input type="email" class="form-input" id="regEmail" placeholder="seu@email.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <input type="password" class="form-input" id="regPassword" placeholder="Mínimo 6 caracteres">
+      </div>
+      <button class="btn-auth" onclick="doRegister()">Criar Conta</button>
+    </div>
+
+    <!-- FORGOT PANEL -->
+    <div class="forgot-panel" id="panelForgot">
+      <div class="back-link" onclick="hideForgot()">← Voltar ao login</div>
+      <div class="form-group">
+        <label class="form-label">E-mail cadastrado</label>
+        <input type="email" class="form-input" id="forgotEmail" placeholder="seu@email.com">
+      </div>
+      <button class="btn-auth" onclick="doForgot()">Enviar link de recuperação</button>
+    </div>
+
+    <div class="auth-footer">SIGCORJ · Gestão de Frotas © 2026</div>
+  </div>
+</div>
+
+<!-- ═══ DASHBOARD APP ═══ -->
+<div id="dashboardApp">
+  <div class="app-wrap">
+
+    <!-- SIDEBAR -->
+    <aside class="app-sidebar">
+      <div class="sidebar-head" onclick="showHome()">
+        <div class="s-logo">
+          <svg width="22" height="22" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="15" y="15" width="70" height="70" rx="10" transform="rotate(45 50 50)" fill="white" fill-opacity=".2"/>
+            <polygon points="72,50 50,28 50,40 28,40 28,60 50,60 50,72" fill="white"/>
+          </svg>
+        </div>
+        <div class="s-logo-text">
+          <span>SIGCORJ</span>
+          <span>Gestão de Frotas</span>
+        </div>
+      </div>
+
+      <!-- USER -->
+      <div class="user-card">
+        <div class="user-avatar" id="sidebarAvatar">?</div>
+        <div class="user-info">
+          <span id="sidebarNome">Carregando...</span>
+          <span id="sidebarEmpresa">—</span>
+        </div>
+      </div>
+
+      <!-- NAV -->
+      <div class="s-section">
+        <div class="s-section-label">Jornada</div>
+        <div class="s-item active" id="nav-home" onclick="showHome()"><span class="s-item-icon">🏠</span>Painel Geral</div>
+        <div class="s-item" id="nav-jornada" onclick="showModule('jornada')"><span class="s-item-icon">⏱️</span>Horas Extras</div>
+        <div class="s-item" id="nav-nc" onclick="showModule('nc')"><span class="s-item-icon">⚠️</span>Não Conformidades</div>
+      </div>
+
+      <div class="s-section">
+        <div class="s-section-label">Operação</div>
+        <div class="s-item" id="nav-multas" onclick="showModule('multas')"><span class="s-item-icon">🚦</span>Multas</div>
+        <div class="s-item" id="nav-comb" onclick="showModule('comb')"><span class="s-item-icon">⛽</span>Combustível</div>
+        <div class="s-item" id="nav-frota" onclick="showModule('frota')"><span class="s-item-icon">🚛</span>Frota</div>
+      </div>
+
+      <div class="s-section">
+        <div class="s-section-label">Análise</div>
+        <div class="s-item" id="nav-comp" onclick="showModule('comp')"><span class="s-item-icon">📊</span>Comparativos</div>
+        <div class="s-item" id="nav-res" onclick="showModule('res')"><span class="s-item-icon">💰</span>Resultados</div>
+      </div>
+
+      <div class="s-logout" onclick="doLogout()">
+        <span>🚪</span> Sair do Sistema
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="app-main">
+      <div class="app-topbar">
+        <div>
+          <div class="topbar-title" id="appTitle">Painel Geral</div>
+          <div class="topbar-sub" id="appSub">Visão geral dos seus dados</div>
+        </div>
+        <div class="period-pill" id="appPeriod">SIGCORJ</div>
+      </div>
+
+      <div class="app-content">
+        <div class="app-alert" id="appAlert"></div>
+
+        <!-- HOME -->
+        <div id="pageHome">
+          <div style="background:linear-gradient(135deg,var(--navy-mid),rgba(26,159,224,0.05));border:1px solid rgba(26,159,224,0.12);border-radius:var(--radius);padding:28px 32px;margin-bottom:22px;position:relative;overflow:hidden">
+            <div style="position:absolute;right:24px;top:-8px;font-family:'Barlow Condensed',sans-serif;font-size:80px;font-weight:900;color:rgba(26,159,224,0.04);pointer-events:none">SIGCORJ</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;margin-bottom:6px">Bem-vindo ao SIGCORJ! 👋</div>
+            <p style="font-size:13px;color:var(--gray-2);line-height:1.65;max-width:580px">Selecione um módulo no menu lateral e importe sua planilha para visualizar os dashboards de jornada, combustível, multas e muito mais.</p>
+          </div>
+          <div class="section-title">Resumo dos Módulos</div>
+          <div class="home-grid" id="homeGrid">
+            <div class="home-card">
+              <div class="home-card-head">
+                <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--blue-bright)">⏱️ Horas Extras</span>
+                <span style="font-size:10px;color:var(--gray-3)" id="homeJornadaInfo">Sem dados</span>
+              </div>
+              <div class="home-card-body" id="homeJornadaBody">
+                <p style="font-size:12px;color:var(--gray-3)">Importe uma planilha de jornada para ver os indicadores.</p>
+              </div>
+            </div>
+            <div class="home-card">
+              <div class="home-card-head">
+                <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#ff6b7a">⚠️ Não Conformidades</span>
+                <span style="font-size:10px;color:var(--gray-3)" id="homeNcInfo">Sem dados</span>
+              </div>
+              <div class="home-card-body" id="homeNcBody">
+                <p style="font-size:12px;color:var(--gray-3)">Importe uma planilha de NC para ver as ocorrências.</p>
+              </div>
+            </div>
+            <div class="home-card">
+              <div class="home-card-head">
+                <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#f87171">🚦 Multas</span>
+                <span style="font-size:10px;color:var(--gray-3)" id="homeMultasInfo">Sem dados</span>
+              </div>
+              <div class="home-card-body" id="homeMultasBody">
+                <p style="font-size:12px;color:var(--gray-3)">Importe a planilha de multas para ver os registros.</p>
+              </div>
+            </div>
+            <div class="home-card">
+              <div class="home-card-head">
+                <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#fb923c">⛽ Combustível</span>
+                <span style="font-size:10px;color:var(--gray-3)" id="homeCombInfo">Sem dados</span>
+              </div>
+              <div class="home-card-body" id="homeCombBody">
+                <p style="font-size:12px;color:var(--gray-3)">Importe a planilha de combustível para ver as médias.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MÓDULO GENÉRICO -->
+        <div id="pageModule" style="display:none">
+          <div class="upload-module">
+            <div class="upload-module-head">
+              <h3 id="moduleTitle">Módulo</h3>
+              <button class="btn-upload" onclick="triggerUpload()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Importar Planilha
+              </button>
+            </div>
+
+            <div id="moduleEmpty">
+              <div class="module-empty">
+                <div class="module-empty-icon" id="moduleIcon">📋</div>
+                <h4 id="moduleEmptyTitle">Sem dados</h4>
+                <p id="moduleEmptyDesc">Importe sua planilha para visualizar o dashboard.</p>
+              </div>
+              <div class="drop-zone" onclick="triggerUpload()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--blue-bright)" stroke-width="1.5" style="margin:0 auto 10px;display:block"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <strong>Clique para importar ou arraste aqui</strong>
+                <p>Formatos aceitos: .xlsx, .xls, .csv</p>
+              </div>
+            </div>
+
+            <div id="moduleDash" style="display:none;padding:16px 20px 20px">
+              <div class="kpi-grid" id="modKpiGrid"></div>
+              <div class="section-title">Detalhamento</div>
+              <div class="table-card">
+                <div class="table-head-bar">
+                  <h3 id="modTableTitle">Registros</h3>
+                  <div class="search-box">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7ea8c4" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    <input type="text" id="modSearch" placeholder="Buscar..." oninput="filterModTable()">
+                  </div>
+                </div>
+                <div style="overflow-x:auto">
+                  <table>
+                    <thead><tr id="modTableHead"></tr></thead>
+                    <tbody id="modTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// ── SUPABASE CONFIG ──
+var SB_URL = 'https://ddeywkpjolesfiictshg.supabase.co';
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkZXl3a3Bqb2xlc2ZpaWN0c2hnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzOTgzMTksImV4cCI6MjA5Njk3NDMxOX0.0-3xoYQ8tC_40FaOIvHTXr_C61UPTTh9eMM4w_aPrvw';
+
+var currentUser = null;
+var currentSession = null;
+var currentModule = 'home';
+var moduleData = {};
+var allModRows = [];
+
+// ── SUPABASE AUTH API ──
+function sbAuth(path, body, token) {
+  return fetch(SB_URL + '/auth/v1/' + path, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SB_KEY,
+      'Authorization': token ? 'Bearer ' + token : 'Bearer ' + SB_KEY
+    },
+    body: JSON.stringify(body)
+  }).then(function(r) { return r.json(); });
+}
+
+function sbData(path, options) {
+  options = options || {};
+  return fetch(SB_URL + '/rest/v1/' + path, {
+    method: options.method || 'GET',
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + (currentSession ? currentSession.access_token : SB_KEY),
+      'Content-Type': 'application/json',
+      'Prefer': options.prefer || ''
+    },
+    body: options.body ? JSON.stringify(options.body) : undefined
+  }).then(function(r) { return r.text().then(function(t) { return t ? JSON.parse(t) : null; }); });
+}
+
+// ── INIT ──
+window.addEventListener('load', function() {
+  var saved = localStorage.getItem('sigcorj_session');
+  if (saved) {
+    try {
+      var sess = JSON.parse(saved);
+      // Verify token still valid
+      fetch(SB_URL + '/auth/v1/user', {
+        headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + sess.access_token }
+      }).then(function(r) { return r.json(); }).then(function(user) {
+        if (user && user.id) {
+          currentSession = sess;
+          currentUser = user;
+          showDashboard();
+        } else {
+          localStorage.removeItem('sigcorj_session');
+          showAuth();
+        }
+      }).catch(function() { showAuth(); });
+    } catch(e) { showAuth(); }
+  } else {
+    showAuth();
+  }
+});
+
+function showAuth() {
+  document.getElementById('loadingScreen').classList.add('hide');
+  document.getElementById('authApp').style.display = 'flex';
+  document.getElementById('dashboardApp').style.display = 'none';
+  document.body.style.alignItems = 'center';
+  document.body.style.justifyContent = 'center';
+}
+
+function showDashboard() {
+  document.getElementById('loadingScreen').classList.add('hide');
+  document.getElementById('authApp').style.display = 'none';
+  document.getElementById('dashboardApp').style.display = 'block';
+  document.body.style.alignItems = 'stretch';
+  document.body.style.justifyContent = 'stretch';
+  document.body.style.padding = '0';
+  loadUserProfile();
+}
+
+// ── AUTH FUNCTIONS ──
+function switchTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach(function(t, i) {
+    t.classList.toggle('active', (tab==='login' && i===0) || (tab==='register' && i===1));
+  });
+  document.getElementById('panelLogin').classList.toggle('show', tab==='login');
+  document.getElementById('panelRegister').classList.toggle('show', tab==='register');
+  document.getElementById('panelForgot').classList.remove('show');
+  document.getElementById('authTabs').style.display = 'flex';
+  hideAuthAlert();
+}
+
+function showForgot() {
+  document.getElementById('panelLogin').classList.remove('show');
+  document.getElementById('panelRegister').classList.remove('show');
+  document.getElementById('panelForgot').classList.add('show');
+  document.getElementById('authTabs').style.display = 'none';
+  hideAuthAlert();
+}
+
+function hideForgot() {
+  document.getElementById('panelForgot').classList.remove('show');
+  document.getElementById('panelLogin').classList.add('show');
+  document.getElementById('authTabs').style.display = 'flex';
+}
+
+function showAuthAlert(msg, type) {
+  var el = document.getElementById('authAlert');
+  el.textContent = msg;
+  el.className = 'auth-alert show ' + (type || 'error');
+}
+function hideAuthAlert() { document.getElementById('authAlert').classList.remove('show'); }
+
+function doLogin() {
+  var email = document.getElementById('loginEmail').value.trim();
+  var pass  = document.getElementById('loginPassword').value;
+  if (!email || !pass) { showAuthAlert('Preencha e-mail e senha.'); return; }
+  var btn = document.querySelector('#panelLogin .btn-auth');
+  btn.disabled = true; btn.textContent = 'Entrando...';
+  sbAuth('token?grant_type=password', { email: email, password: pass }).then(function(data) {
+    btn.disabled = false; btn.textContent = 'Entrar';
+    if (data.error || !data.access_token) {
+      showAuthAlert(data.error_description || 'E-mail ou senha incorretos.');
+    } else {
+      currentSession = data;
+      currentUser = data.user;
+      localStorage.setItem('sigcorj_session', JSON.stringify(data));
+      hideAuthAlert();
+      showDashboard();
+    }
+  }).catch(function() {
+    btn.disabled = false; btn.textContent = 'Entrar';
+    showAuthAlert('Erro de conexão. Tente novamente.');
+  });
+}
+
+function doRegister() {
+  var nome    = document.getElementById('regNome').value.trim();
+  var empresa = document.getElementById('regEmpresa').value.trim();
+  var email   = document.getElementById('regEmail').value.trim();
+  var pass    = document.getElementById('regPassword').value;
+  if (!nome || !email || !pass) { showAuthAlert('Preencha todos os campos.'); return; }
+  if (pass.length < 6) { showAuthAlert('A senha deve ter ao menos 6 caracteres.'); return; }
+  var btn = document.querySelector('#panelRegister .btn-auth');
+  btn.disabled = true; btn.textContent = 'Criando conta...';
+  sbAuth('signup', { email: email, password: pass, data: { nome: nome, empresa: empresa } }).then(function(data) {
+    btn.disabled = false; btn.textContent = 'Criar Conta';
+    if (data.error) {
+      showAuthAlert(data.error_description || data.msg || 'Erro ao criar conta.');
+    } else {
+      showAuthAlert('✅ Conta criada! Verifique seu e-mail para confirmar o cadastro.', 'success');
+      setTimeout(function() { switchTab('login'); }, 3000);
+    }
+  }).catch(function() {
+    btn.disabled = false; btn.textContent = 'Criar Conta';
+    showAuthAlert('Erro de conexão. Tente novamente.');
+  });
+}
+
+function doForgot() {
+  var email = document.getElementById('forgotEmail').value.trim();
+  if (!email) { showAuthAlert('Informe seu e-mail.'); return; }
+  var btn = document.querySelector('#panelForgot .btn-auth');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  sbAuth('recover', { email: email }).then(function() {
+    btn.disabled = false; btn.textContent = 'Enviar link de recuperação';
+    showAuthAlert('✅ Link de recuperação enviado para ' + email, 'success');
+  }).catch(function() {
+    btn.disabled = false; btn.textContent = 'Enviar link de recuperação';
+    showAuthAlert('Erro ao enviar. Tente novamente.');
+  });
+}
+
+function doLogout() {
+  fetch(SB_URL + '/auth/v1/logout', {
+    method: 'POST',
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + currentSession.access_token }
+  }).finally(function() {
+    currentSession = null; currentUser = null; moduleData = {};
+    localStorage.removeItem('sigcorj_session');
+    showAuth();
+  });
+}
+
+// ── USER PROFILE ──
+function loadUserProfile() {
+  if (!currentUser) return;
+  var meta = currentUser.user_metadata || {};
+  var nome = meta.nome || currentUser.email.split('@')[0];
+  var empresa = meta.empresa || '—';
+  var initials = nome.split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase();
+  document.getElementById('sidebarAvatar').textContent = initials;
+  document.getElementById('sidebarNome').textContent = nome;
+  document.getElementById('sidebarEmpresa').textContent = empresa;
+}
+
+// ── NAVIGATION ──
+function setActiveNav(id) {
+  document.querySelectorAll('.s-item').forEach(function(i){ i.classList.remove('active'); });
+  var el = document.getElementById('nav-' + id);
+  if (el) el.classList.add('active');
+}
+
+function showHome() {
+  currentModule = 'home';
+  setActiveNav('home');
+  document.getElementById('pageHome').style.display = 'block';
+  document.getElementById('pageModule').style.display = 'none';
+  document.getElementById('appTitle').textContent = 'Painel Geral';
+  document.getElementById('appSub').textContent = 'Visão geral dos seus dados';
+  document.getElementById('appPeriod').textContent = 'SIGCORJ';
+  updateHomeCards();
+}
+
+var MODULE_CONFIG = {
+  jornada: { icon:'⏱️', title:'Horas Extras',       desc:'Colunas: Nome, Horas 50%, Horas 100%, Pago 50%, Pago 100%, NCs' },
+  nc:      { icon:'⚠️', title:'Não Conformidades',   desc:'Colunas: Nome, Direção Contínua, Alimentação, Interjornada, Excesso' },
+  multas:  { icon:'🚦', title:'Controle de Multas',  desc:'Colunas: Motorista/Condutor, Placa, Data, Tipo, Valor, Status' },
+  comb:    { icon:'⛽', title:'Média de Combustível', desc:'Colunas: Motorista, Placa, KM Rodados, Litros, Média km/l' },
+  frota:   { icon:'🚛', title:'Relatório de Frota',  desc:'Colunas: Placa, Modelo, Ano, KM, Última Manutenção, Status' },
+  comp:    { icon:'📊', title:'Comparativos',         desc:'Importe dois arquivos para comparar períodos lado a lado' },
+  res:     { icon:'💰', title:'Resultados Acumulados',desc:'Calculado automaticamente a partir dos dados de jornada' },
+};
+
+function showModule(mod) {
+  currentModule = mod;
+  setActiveNav(mod);
+  var cfg = MODULE_CONFIG[mod] || { icon:'📋', title: mod, desc:'' };
+  document.getElementById('pageHome').style.display = 'none';
+  document.getElementById('pageModule').style.display = 'block';
+  document.getElementById('appTitle').textContent = cfg.title;
+  document.getElementById('appSub').textContent = 'Importe sua planilha para visualizar';
+  document.getElementById('appPeriod').textContent = cfg.title.toUpperCase();
+  document.getElementById('moduleTitle').textContent = cfg.title;
+  document.getElementById('moduleIcon').textContent = cfg.icon;
+  document.getElementById('moduleEmptyTitle').textContent = 'Sem dados — importe a planilha';
+  document.getElementById('moduleEmptyDesc').textContent = cfg.desc;
+  if (moduleData[mod] && moduleData[mod].length > 0) {
+    renderModuleDash(mod, moduleData[mod]);
+  } else {
+    document.getElementById('moduleEmpty').style.display = 'block';
+    document.getElementById('moduleDash').style.display = 'none';
+  }
+}
+
+// ── UPLOAD ──
+function triggerUpload() { document.getElementById('fileInput').click(); }
+
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  if (e.target.files[0]) handleFile(e.target.files[0]);
+  this.value = '';
+});
+
+function handleFile(file) {
+  var ext = file.name.split('.').pop().toLowerCase();
+  if (!['xlsx','xls','csv'].includes(ext)) { showAppAlert('Formato inválido. Use .xlsx, .xls ou .csv'); return; }
+  var reader = new FileReader();
+  reader.onerror = function() { showAppAlert('Erro ao ler arquivo.'); };
+  reader.onload = function(e) {
+    try {
+      var wb;
+      if (ext === 'csv') {
+        var text = new TextDecoder('utf-8').decode(new Uint8Array(e.target.result));
+        wb = XLSX.read(text, {type:'string'});
+      } else {
+        wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+      }
+      var ws   = wb.Sheets[wb.SheetNames[0]];
+      var json = XLSX.utils.sheet_to_json(ws, {defval:''});
+      if (!json.length) { showAppAlert('Planilha vazia.'); return; }
+      moduleData[currentModule] = json;
+      saveUserData(currentModule, json);
+      renderModuleDash(currentModule, json);
+      showAppAlert('✅ ' + json.length + ' registros carregados!', 'success');
+    } catch(err) { showAppAlert('Erro ao processar: ' + err.message); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ── SAVE/LOAD DATA (Supabase per user) ──
+function saveUserData(modulo, rows) {
+  if (!currentUser) return;
+  var payload = { user_id: currentUser.id, modulo: modulo, dados: rows };
+  // Upsert
+  sbData('dados_usuario?modulo=eq.' + modulo + '&user_id=eq.' + currentUser.id, {
+    method: 'DELETE', prefer: 'return=minimal'
+  }).then(function() {
+    sbData('dados_usuario', { method: 'POST', prefer: 'return=minimal', body: payload });
+  }).catch(function(){});
+}
+
+function loadUserData(modulo) {
+  if (!currentUser) return Promise.resolve([]);
+  return sbData('dados_usuario?user_id=eq.' + currentUser.id + '&modulo=eq.' + modulo + '&select=dados')
+    .then(function(data) {
+      if (data && data.length > 0 && data[0].dados) return data[0].dados;
+      return [];
+    }).catch(function() { return []; });
+}
+
+// ── RENDER ──
+function renderModuleDash(mod, rows) {
+  document.getElementById('moduleEmpty').style.display = 'none';
+  document.getElementById('moduleDash').style.display = 'block';
+  allModRows = rows;
+  var cols = Object.keys(rows[0] || {});
+  document.getElementById('modTableTitle').textContent = rows.length + ' registros';
+
+  // KPIs
+  var kpis = [
+    { label:'Total Registros', value: rows.length, cls:'blue', icon:'📋' },
+    { label:'Colunas', value: cols.length, cls:'green', icon:'🔢' },
+  ];
+
+  // Module-specific KPIs
+  if (mod === 'jornada') {
+    var totP = rows.reduce(function(s,r){
+      var p50  = parseFloat(r[cols.find(function(c){return c.toLowerCase().includes('pago')&&c.toLowerCase().includes('50');})||''])||0;
+      var p100 = parseFloat(r[cols.find(function(c){return c.toLowerCase().includes('pago')&&c.toLowerCase().includes('100');})||''])||0;
+      return s + p50 + p100;
+    }, 0);
+    kpis.push({ label:'Total Pago', value:'R$ '+totP.toLocaleString('pt-BR',{minimumFractionDigits:2}), cls:'orange', icon:'💰' });
+  }
+  if (mod === 'multas') {
+    var valCol = cols.find(function(c){return c.toLowerCase().includes('valor');});
+    if (valCol) {
+      var totV = rows.reduce(function(s,r){return s+(parseFloat(r[valCol])||0);},0);
+      kpis.push({ label:'Valor Total', value:'R$ '+totV.toLocaleString('pt-BR',{minimumFractionDigits:2}), cls:'red', icon:'🚦' });
+    }
+  }
+  if (mod === 'comb') {
+    var mCol = cols.find(function(c){return c.toLowerCase().includes('media')||c.toLowerCase().includes('km');});
+    if (mCol) {
+      var vals = rows.map(function(r){return parseFloat(r[mCol])||0;}).filter(function(v){return v>0;});
+      var avg = vals.length ? (vals.reduce(function(a,b){return a+b;},0)/vals.length).toFixed(1) : '—';
+      kpis.push({ label:'Média km/l', value: avg+' km/l', cls:'orange', icon:'⛽' });
+    }
+  }
+
+  document.getElementById('modKpiGrid').innerHTML = kpis.map(function(k){
+    return '<div class="kpi-card '+k.cls+'"><div class="kpi-label">'+k.label+'</div><div class="kpi-value">'+k.value+'</div><div class="kpi-icon">'+k.icon+'</div></div>';
+  }).join('');
+
+  // Table
+  document.getElementById('modTableHead').innerHTML = cols.map(function(c){
+    return '<th>'+c.replace(/_/g,' ').toUpperCase()+'</th>';
+  }).join('');
+  renderModTable(rows, cols);
+  updateHomeCards();
+}
+
+function renderModTable(rows, cols) {
+  if (!cols) cols = Object.keys((allModRows[0]||{}));
+  document.getElementById('modTableBody').innerHTML = rows.slice(0,200).map(function(r,i){
+    return '<tr>'+cols.map(function(c,ci){
+      var val = String(r[c]||'');
+      if (ci===0) {
+        var ini = val.split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase()||String(i+1);
+        return '<td class="driver-name"><div class="driver-av">'+ini+'</div>'+val+'</td>';
+      }
+      var num = parseFloat(val);
+      if (!isNaN(num)&&val!=='') {
+        var isVal = c.toLowerCase().includes('valor')||c.toLowerCase().includes('pago')||c.toLowerCase().includes('r$');
+        return '<td class="num">'+(isVal?'R$ '+num.toLocaleString('pt-BR',{minimumFractionDigits:2}):num.toLocaleString('pt-BR',{maximumFractionDigits:2}))+'</td>';
+      }
+      return '<td style="color:var(--gray-2);font-size:12px">'+val+'</td>';
+    }).join('')+'</tr>';
+  }).join('');
+}
+
+function filterModTable() {
+  var q = document.getElementById('modSearch').value.toLowerCase();
+  var cols = Object.keys(allModRows[0]||{});
+  var filtered = allModRows.filter(function(r){ return cols.some(function(c){return String(r[c]||'').toLowerCase().includes(q);}); });
+  renderModTable(filtered, cols);
+}
+
+// ── HOME CARDS ──
+function updateHomeCards() {
+  ['jornada','nc','multas','comb'].forEach(function(mod) {
+    var rows = moduleData[mod];
+    var infoEl   = document.getElementById('home'+mod.charAt(0).toUpperCase()+mod.slice(1)+'Info');
+    if (!infoEl) return;
+    if (!rows || !rows.length) return;
+    if (infoEl) infoEl.textContent = rows.length + ' registros';
+    var bodyEl = document.getElementById('home'+mod.charAt(0).toUpperCase()+mod.slice(1)+'Body');
+    if (bodyEl) bodyEl.innerHTML = '<p style="font-size:12px;color:var(--green)">✅ '+rows.length+' registros carregados. <a onclick="showModule(\''+mod+'\')" style="color:var(--blue-bright);cursor:pointer;font-weight:600">Ver dashboard →</a></p>';
+  });
+  // Special case for Nc (capital)
+  if (moduleData['nc'] && moduleData['nc'].length) {
+    var ncInfo = document.getElementById('homeNcInfo');
+    var ncBody = document.getElementById('homeNcBody');
+    if (ncInfo) ncInfo.textContent = moduleData['nc'].length + ' registros';
+    if (ncBody) ncBody.innerHTML = '<p style="font-size:12px;color:var(--green)">✅ '+moduleData['nc'].length+' registros. <a onclick="showModule(\'nc\')" style="color:var(--blue-bright);cursor:pointer;font-weight:600">Ver dashboard →</a></p>';
+  }
+}
+
+// ── APP ALERT ──
+var alertTimer;
+function showAppAlert(msg, type) {
+  var el = document.getElementById('appAlert');
+  el.textContent = msg;
+  el.className = 'app-alert show ' + (type||'error');
+  clearTimeout(alertTimer);
+  alertTimer = setTimeout(function(){ el.classList.remove('show'); }, 5000);
+}
+
+// Enter key support
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    var panelForgot = document.getElementById('panelForgot');
+    var panelLogin  = document.getElementById('panelLogin');
+    var panelReg    = document.getElementById('panelRegister');
+    if (panelForgot.classList.contains('show')) doForgot();
+    else if (panelLogin.classList.contains('show'))  doLogin();
+    else if (panelReg.classList.contains('show'))    doRegister();
+  }
+});
+</script>
+</body>
+</html>

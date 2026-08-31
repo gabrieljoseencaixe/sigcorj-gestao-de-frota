@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="pt-BR" translate="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS — SIGCORJ</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHJlY3QgeD0iMTUiIHk9IjE1IiB3aWR0aD0iNzAiIGhlaWdodD0iNzAiIHJ4PSIxMiIgdHJhbnNmb3JtPSJyb3RhdGUoNDUgNTAgNTApIiBmaWxsPSIjMWE5ZmUwIi8+CiAgPHJlY3QgeD0iMjIiIHk9IjIyIiB3aWR0aD0iNTYiIGhlaWdodD0iNTYiIHJ4PSI4IiB0cmFuc2Zvcm09InJvdGF0ZSg0NSA1MCA1MCkiIGZpbGw9IiMwZjIwNDQiLz4KICA8cG9seWdvbiBwb2ludHM9IjcyLDUwIDUwLDI4IDUwLDQwIDI4LDQwIDI4LDYwIDUwLDYwIDUwLDcyIiBmaWxsPSIjMWE5ZmUwIi8+Cjwvc3ZnPgo=">
+<link rel="shortcut icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHJlY3QgeD0iMTUiIHk9IjE1IiB3aWR0aD0iNzAiIGhlaWdodD0iNzAiIHJ4PSIxMiIgdHJhbnNmb3JtPSJyb3RhdGUoNDUgNTAgNTApIiBmaWxsPSIjMWE5ZmUwIi8+CiAgPHJlY3QgeD0iMjIiIHk9IjIyIiB3aWR0aD0iNTYiIGhlaWdodD0iNTYiIHJ4PSI4IiB0cmFuc2Zvcm09InJvdGF0ZSg0NSA1MCA1MCkiIGZpbGw9IiMwZjIwNDQiLz4KICA8cG9seWdvbiBwb2ludHM9IjcyLDUwIDUwLDI4IDUwLDQwIDI4LDQwIDI4LDYwIDUwLDYwIDUwLDcyIiBmaWxsPSIjMWE5ZmUwIi8+Cjwvc3ZnPgo=">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800;900&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --navy:#000000;--navy-mid:#000048;--navy-light:#101066;--navy-card:#0a0f2e;
+  --blue:#2e3fb0;--blue-bright:#5f7ce0;
+  --white:#ffffff;--gray-1:#eef4fb;--gray-2:#c9d6ec;--gray-3:#7c8bc0;--gray-4:#3d4590;
+  --green:#00d68f;--red:#ff4757;--orange:#ff9f43;--yellow:#facc15;
+  --nexus:#818cf8;--nexus-dim:rgba(129,140,248,0.12);
+  --radius:16px;--radius-sm:10px;--radius-xs:7px;
+  --shadow-card:0 4px 24px rgba(0,0,0,0.6);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Barlow',sans-serif;background:var(--navy);color:var(--white);min-height:100vh}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:rgba(129,140,248,0.25);border-radius:8px}
+
+/* TOPBAR */
+.nx-topbar{
+  position:sticky;top:0;z-index:50;
+  background:linear-gradient(180deg,#000000 0%,#000048 100%);
+  border-bottom:1px solid rgba(129,140,248,0.2);
+  padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  box-shadow:0 4px 20px rgba(0,0,0,0.4);
+}
+.nx-brand{display:flex;align-items:center;gap:12px}
+.nx-brand-icon{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#818cf8,#4f46e5);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 6px 18px rgba(129,140,248,0.4)}
+.nx-brand h1{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#fff,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nx-brand p{font-size:11px;color:#a5b4fc;letter-spacing:.5px;margin-top:1px}
+.nx-topbar-right{display:flex;align-items:center;gap:10px}
+.nx-pill{font-size:11px;font-weight:700;color:var(--gray-2);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);padding:7px 14px;border-radius:20px}
+.nx-btn-close{background:rgba(255,71,87,0.1);border:1px solid rgba(255,71,87,0.3);color:#ff6b7a;padding:9px 16px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;transition:.2s}
+.nx-btn-close:hover{background:rgba(255,71,87,0.18)}
+
+.nx-wrap{max-width:1440px;margin:0 auto;padding:22px 24px 60px}
+
+/* GATE (sem sessão) */
+.nx-gate{position:fixed;top:16px;right:16px;z-index:999;max-width:260px}
+.nx-gate-card{background:#0f2044;border:1px solid rgba(129,140,248,0.25);border-radius:10px;padding:12px 14px;box-shadow:0 8px 24px rgba(0,0,0,0.5);display:flex;align-items:center;gap:10px}
+.nx-gate-icon{font-size:16px;flex-shrink:0}
+.nx-gate-text{flex:1;text-align:left}
+.nx-gate-card p{font-size:10.5px;color:var(--gray-3);line-height:1.4;margin-bottom:6px}
+.nx-gate-card a{display:inline-block;color:#a5b4fc;text-decoration:underline;font-weight:700;font-size:10.5px}
+
+/* FILTER BAR */
+.nx-filters{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:20px;background:var(--navy-card);border:1px solid rgba(129,140,248,0.15);border-radius:var(--radius-sm);padding:14px 16px}
+.nx-field{display:flex;flex-direction:column;gap:5px}
+.nx-field label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gray-3)}
+.nx-field select,.nx-field input{background:var(--navy-mid);border:1px solid rgba(129,140,248,0.25);border-radius:8px;color:var(--gray-1);font-size:13px;padding:8px 12px;outline:none;min-width:130px}
+.nx-field select:focus,.nx-field input:focus{border-color:#818cf8}
+.nx-btn-clear{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--gray-3);padding:9px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;height:fit-content}
+.nx-btn-clear:hover{background:rgba(255,71,87,0.1);color:#ff6b7a}
+
+/* SECTION HEADERS */
+.nx-section-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;letter-spacing:.5px;color:var(--gray-1);margin:28px 0 12px;display:flex;align-items:center;gap:8px}
+.nx-section-title span.sub{font-size:11px;font-weight:500;color:var(--gray-3);text-transform:none;letter-spacing:0}
+
+/* KPI GRID */
+.nx-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.nx-kpi{background:var(--navy-card);border:1px solid rgba(129,140,248,0.15);border-radius:var(--radius-sm);padding:16px;position:relative;overflow:hidden}
+.nx-kpi::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--kpi-color,#818cf8)}
+.nx-kpi-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--gray-3);margin-bottom:8px}
+.nx-kpi-value{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;color:var(--white)}
+.nx-kpi-sub{font-size:11px;color:var(--gray-3);margin-top:4px}
+
+/* CARDS */
+.nx-card{background:var(--navy-card);border:1px solid rgba(129,140,248,0.15);border-radius:var(--radius);padding:18px 20px;margin-bottom:16px;box-shadow:var(--shadow-card)}
+.nx-card h3{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.nx-empty{font-size:12.5px;color:var(--gray-3);text-align:center;padding:26px 10px}
+
+/* GRID 2 COL */
+.nx-grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:16px}
+@media(max-width:900px){.nx-grid2{grid-template-columns:1fr}}
+
+/* ALERTS */
+.nx-alert{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;border-radius:10px;margin-bottom:8px;font-size:12.5px;line-height:1.4}
+.nx-alert.crit{background:rgba(255,71,87,0.08);border:1px solid rgba(255,71,87,0.25)}
+.nx-alert.warn{background:rgba(250,204,21,0.08);border:1px solid rgba(250,204,21,0.25)}
+.nx-alert .dot{font-size:15px;line-height:1}
+.nx-alert b{color:var(--white)}
+.nx-alert .meta{color:var(--gray-3);font-size:11px;margin-top:2px}
+
+/* TABLE */
+.nx-table-wrap{overflow-x:auto}
+table.nx-table{width:100%;border-collapse:collapse;font-size:12.5px}
+table.nx-table th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray-3);padding:9px 10px;border-bottom:1px solid rgba(129,140,248,0.2);white-space:nowrap}
+table.nx-table td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--gray-1);white-space:nowrap}
+table.nx-table tbody tr{cursor:pointer;transition:background .15s}
+table.nx-table tbody tr:hover{background:rgba(129,140,248,0.06)}
+.nx-badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:700}
+.nx-badge.ok{background:rgba(0,214,143,0.12);color:#00d68f}
+.nx-badge.warn{background:rgba(250,204,21,0.12);color:#facc15}
+.nx-badge.crit{background:rgba(255,71,87,0.12);color:#ff6b7a}
+.nx-badge.neutral{background:rgba(255,255,255,0.08);color:var(--gray-2)}
+
+/* RANKING */
+.nx-rank-row{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12.5px}
+.nx-rank-pos{width:22px;height:22px;border-radius:6px;background:rgba(129,140,248,0.15);color:#a5b4fc;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nx-rank-name{flex:1;font-weight:600;color:var(--gray-1)}
+.nx-rank-score{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px}
+
+/* DRILLDOWN MODAL */
+.nx-modal-bg{position:fixed;inset:0;background:rgba(5,8,20,0.85);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.nx-modal{background:#0f1445;border:1px solid rgba(129,140,248,0.3);border-radius:16px;padding:22px 24px;max-width:640px;width:100%;max-height:86vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,0.6)}
+.nx-modal-close{float:right;background:rgba(255,255,255,0.06);border:none;color:var(--gray-3);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px}
+.nx-timeline{display:flex;flex-direction:column;gap:2px;margin:14px 0}
+.nx-timeline-step{display:flex;gap:10px;align-items:center;font-size:12.5px;padding:6px 0}
+.nx-timeline-dot{width:8px;height:8px;border-radius:50%;background:#818cf8;flex-shrink:0}
+.nx-timeline-step.dim{color:var(--gray-3)}
+.nx-kv{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;font-size:12.5px;margin:12px 0}
+.nx-kv div b{display:block;color:var(--gray-3);font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin-bottom:2px}
+
+.nx-loading{text-align:center;padding:60px 20px;color:var(--gray-3);font-size:13px}
+.nx-spin{width:34px;height:34px;border:3px solid rgba(129,140,248,0.2);border-top-color:#818cf8;border-radius:50%;margin:0 auto 14px;animation:nxspin 0.8s linear infinite}
+@keyframes nxspin{to{transform:rotate(360deg)}}
+
+.nx-footer{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:36px;padding-top:18px;border-top:1px solid rgba(129,140,248,0.12)}
+.nx-footer-icon{width:24px;height:24px;flex-shrink:0;opacity:.85}
+.nx-footer-text{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px}
+.nx-footer-text span:first-child{font-size:10.5px;font-weight:700;letter-spacing:.6px;color:var(--gray-3)}
+.nx-footer-text span:last-child{font-size:9.5px;color:rgba(255,255,255,0.25);letter-spacing:.3px}
+</style>
+</head>
+<body>
+
+<div id="nxGate" class="nx-gate" hidden>
+  <div class="nx-gate-card">
+    <span class="nx-gate-icon">🧬</span>
+    <div class="nx-gate-text">
+      <p>Sessão do SIGCORJ não encontrada.</p>
+      <a href="index.html">Ir para o SIGCORJ →</a>
+    </div>
+  </div>
+</div>
+
+<div id="nxApp" hidden>
+  <div class="nx-topbar">
+    <div class="nx-brand">
+      <div class="nx-brand-icon">🧬</div>
+      <div>
+        <h1>NEXUS</h1>
+        <p>Inteligência por Viagem, Jornada e Performance</p>
+      </div>
+    </div>
+    <div class="nx-topbar-right">
+      <span class="nx-pill" id="nxEmpresaPill">—</span>
+      <button class="nx-btn-close" onclick="window.close()">✕ Fechar</button>
+    </div>
+  </div>
+
+  <div class="nx-wrap">
+
+    <div class="nx-filters">
+      <div class="nx-field">
+        <label>Ano</label>
+        <select id="nxFiltroAno" onchange="nxReload()"></select>
+      </div>
+      <div class="nx-field">
+        <label>Mês</label>
+        <select id="nxFiltroMes" onchange="nxRender()">
+          <option value="">Todos os meses</option>
+        </select>
+      </div>
+      <div class="nx-field">
+        <label>Motorista</label>
+        <select id="nxFiltroMotorista" onchange="nxRender()">
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <button class="nx-btn-clear" onclick="nxClearFilters()">✕ Limpar Filtros</button>
+    </div>
+
+    <div id="nxLoading" class="nx-loading">
+      <div class="nx-spin"></div>
+      Carregando dados do período...
+    </div>
+
+    <div id="nxContent" hidden>
+
+      <div class="nx-section-title">📊 Visão Executiva <span class="sub">Como está a operação neste período</span></div>
+      <div class="nx-kpi-grid" id="nxKpiGrid"></div>
+
+      <div class="nx-grid2">
+        <div class="nx-card">
+          <h3>🚨 Central de Alertas NEXUS</h3>
+          <div id="nxAlerts"></div>
+        </div>
+        <div class="nx-card">
+          <h3>🏆 Ranking de Impacto na Jornada</h3>
+          <div id="nxRanking"></div>
+        </div>
+      </div>
+
+      <div class="nx-card">
+        <h3>🔍 Detecção de Anomalias <span style="font-size:10.5px;font-weight:600;color:var(--gray-3)">Comparado à média histórica do próprio motorista no ano</span></h3>
+        <div id="nxAnomalias"></div>
+      </div>
+
+      <div class="nx-card">
+        <h3>📦 Índice de Programação por Motorista <span style="font-size:10.5px;font-weight:600;color:var(--gray-3)">Cruza com quem/onde ele mais rodou e a HE do período</span></h3>
+        <div class="nx-table-wrap">
+          <table class="nx-table" id="nxOperacaoTable">
+            <thead>
+              <tr>
+                <th>Motorista</th><th>Cargas</th><th>Cliente/Embarcador Mais Frequente</th>
+                <th>Rota Mais Frequente</th><th>HE no Período</th>
+              </tr>
+            </thead>
+            <tbody id="nxOperacaoBody"></tbody>
+          </table>
+        </div>
+        <div style="font-size:10.5px;color:var(--gray-3);margin-top:8px">📌 "Operação" ainda não existe como campo próprio nas cargas — este índice usa cliente/embarcador e rota como proxy. Se você cadastrar um campo de operação nas cargas futuramente, dá pra deixar essa análise ainda mais precisa.</div>
+      </div>
+
+      <div class="nx-grid2">
+        <div class="nx-card">
+          <h3>Horas Extras por Mês</h3>
+          <canvas id="nxChartHE" height="180"></canvas>
+        </div>
+        <div class="nx-card">
+          <h3>Não Conformidades por Mês</h3>
+          <canvas id="nxChartNC" height="180"></canvas>
+        </div>
+      </div>
+
+      <div class="nx-section-title">🧭 Viagens (Cargas) do Período <span class="sub">Clique em uma linha para abrir o Painel da Viagem</span></div>
+      <div class="nx-card">
+        <div class="nx-table-wrap">
+          <table class="nx-table" id="nxCargasTable">
+            <thead>
+              <tr>
+                <th>Nº</th><th>Motorista</th><th>Veículo</th><th>Data Prog.</th>
+                <th>Status</th><th>Origem → Destino</th><th>Situação</th>
+              </tr>
+            </thead>
+            <tbody id="nxCargasBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="nx-footer">
+    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHJlY3QgeD0iMTUiIHk9IjE1IiB3aWR0aD0iNzAiIGhlaWdodD0iNzAiIHJ4PSIxMiIgdHJhbnNmb3JtPSJyb3RhdGUoNDUgNTAgNTApIiBmaWxsPSIjMWE5ZmUwIi8+CiAgPHJlY3QgeD0iMjIiIHk9IjIyIiB3aWR0aD0iNTYiIGhlaWdodD0iNTYiIHJ4PSI4IiB0cmFuc2Zvcm09InJvdGF0ZSg0NSA1MCA1MCkiIGZpbGw9IiMwZjIwNDQiLz4KICA8cG9seWdvbiBwb2ludHM9IjcyLDUwIDUwLDI4IDUwLDQwIDI4LDQwIDI4LDYwIDUwLDYwIDUwLDcyIiBmaWxsPSIjMWE5ZmUwIi8+Cjwvc3ZnPgo=" alt="SIGCORJ" class="nx-footer-icon">
+    <div class="nx-footer-text">
+      <span>SIGCORJ · NEXUS</span>
+      <span>Sistema Integrado de Governança e Controle de Jornada</span>
+    </div>
+  </div>
+</div>
+
+<div id="nxModalRoot"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// NEXUS — reaproveita a sessão já autenticada do SIGCORJ (mesma origem)
+// ══════════════════════════════════════════════
+const SUPABASE_URL = 'https://redbfzxpdbmojpocbtis.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZGJmenhwZGJtb2pwb2NidGlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NzIzOTUsImV4cCI6MjA5NjI0ODM5NX0.MBH4vNSQFHkwiZO6Si6Y2mYck4hCcVavYEUOEo90g9I';
+
+let authSession = null, currentEmpresa = '', isAdmin = false;
+let nxData = { cargas:[], paradas:[], jornada:[], nc:[], multas:[], comb:[] };
+const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const MESES_CURTO = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+function escHTML(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function fmtBRL(v){ return (Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+function fmtH(v){ var n=Number(v)||0; return n.toFixed(1).replace('.',',')+'h'; }
+
+async function sbFetch(path, options) {
+  options = options || {};
+  var token = (authSession && authSession.access_token) || SUPABASE_KEY;
+  var res = await fetch(SUPABASE_URL + '/rest/v1/' + path, Object.assign({}, options, {
+    headers: Object.assign({
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + token,
+      'Content-Type': 'application/json'
+    }, options.headers || {})
+  }));
+  if (!res.ok) { throw new Error('Supabase error ' + res.status + ': ' + await res.text()); }
+  var text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function nxInit() {
+  var raw = localStorage.getItem('encaixe_session');
+  if (!raw) { document.getElementById('nxGate').hidden = false; document.getElementById('nxApp').hidden = true; return; }
+  try {
+    var sess = JSON.parse(raw);
+    if (!sess.access_token || !sess.access_token.startsWith('eyJ')) throw new Error('sessão inválida');
+    authSession = sess;
+  } catch(e) { document.getElementById('nxGate').hidden = false; document.getElementById('nxApp').hidden = true; return; }
+
+  try {
+    var userRes = await fetch(SUPABASE_URL + '/auth/v1/user', {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + authSession.access_token }
+    });
+    if (!userRes.ok) throw new Error('token expirado');
+    var user = await userRes.json();
+
+    var perfis = await sbFetch('perfis?id=eq.' + user.id + '&select=plano,empresa,nome');
+    var plano = (perfis && perfis[0] && perfis[0].plano) ? perfis[0].plano.toLowerCase().trim() : 'leitor';
+    currentEmpresa = ((perfis && perfis[0] && perfis[0].empresa) || '').trim().toLowerCase();
+    isAdmin = (plano === 'admin');
+  } catch (e) {
+    // Falha de autenticação (sem sessão válida) — mostra a tela de login, garante que o app fica escondido
+    console.error('NEXUS auth error:', e);
+    document.getElementById('nxGate').hidden = false;
+    document.getElementById('nxApp').hidden = true;
+    return;
+  }
+
+  // Autenticado com sucesso: mostra o app e garante que a tela de "sem sessão" fica escondida
+  document.getElementById('nxGate').hidden = true;
+  document.getElementById('nxEmpresaPill').textContent = currentEmpresa ? currentEmpresa.toUpperCase() : 'SIGCORJ';
+  document.getElementById('nxApp').hidden = false;
+  nxPopulateYearSelect();
+
+  try {
+    await nxReload();
+  } catch (e) {
+    // Falha ao carregar dados (não é problema de sessão) — mostra erro dentro do próprio app, sem esconder o topbar
+    console.error('NEXUS data load error:', e);
+    document.getElementById('nxLoading').innerHTML = '<div style="color:#ff6b7a">Erro ao carregar dados: ' + escHTML(e.message) + '</div>';
+  }
+}
+
+function nxPopulateYearSelect() {
+  var sel = document.getElementById('nxFiltroAno');
+  var thisYear = new Date().getFullYear();
+  var years = [thisYear-1, thisYear, thisYear+1, thisYear+2];
+  sel.innerHTML = years.map(function(y){ return '<option value="'+y+'"'+(y===thisYear?' selected':'')+'>'+y+'</option>'; }).join('');
+}
+
+function nxClearFilters() {
+  document.getElementById('nxFiltroMes').value = '';
+  document.getElementById('nxFiltroMotorista').value = '';
+  nxRender();
+}
+
+// ── Carrega dados do ano selecionado ──
+async function nxReload() {
+  document.getElementById('nxLoading').hidden = false;
+  document.getElementById('nxContent').hidden = true;
+  var ano = document.getElementById('nxFiltroAno').value;
+  try {
+    var empresaFilter = currentEmpresa ? '&empresa=eq.' + encodeURIComponent(currentEmpresa) : '';
+    var results = await Promise.all([
+      sbFetch('cargas?select=*' + empresaFilter + '&order=data_programada.desc&limit=500').catch(function(){ return []; }),
+      sbFetch('jornada?select=nome,mes,h50,h100,p50,p100,nc' + empresaFilter + '&ano=eq.' + ano).catch(function(){ return []; }),
+      sbFetch('jornada_nc?select=nome,mes,direcao_continua,tempo_alimentacao,descanso_interjornada,excesso_jornada,total' + empresaFilter + '&ano=eq.' + ano).catch(function(){ return []; }),
+      sbFetch('multas?select=motorista,mes,valor,status,tipo_infracao' + empresaFilter + '&ano=eq.' + ano).catch(function(){ return []; }),
+      sbFetch('combustivel?select=motorista,mes,media_km_litro,valor_abastecimento' + empresaFilter + '&ano=eq.' + ano).catch(function(){ return []; }),
+    ]);
+    nxData.cargas   = results[0] || [];
+    nxData.jornada  = results[1] || [];
+    nxData.nc       = results[2] || [];
+    nxData.multas   = results[3] || [];
+    nxData.comb     = results[4] || [];
+
+    // Tenta carregar paradas das cargas visíveis (coleta/entrega) para exibir origem→destino
+    var cargaIds = nxData.cargas.map(function(c){ return c.id; }).filter(Boolean);
+    if (cargaIds.length) {
+      try {
+        nxData.paradas = await sbFetch('cargas_paradas?carga_id=in.(' + cargaIds.join(',') + ')&select=carga_id,tipo,local_nome,cidade,uf,data_prevista&order=data_prevista.asc');
+      } catch(e) { nxData.paradas = []; }
+    } else { nxData.paradas = []; }
+
+    nxPopulateMotoristaSelect();
+    nxRender();
+  } catch (e) {
+    console.error('NEXUS reload error:', e);
+    document.getElementById('nxLoading').innerHTML = '<div style="color:#ff6b7a">Erro ao carregar dados: ' + escHTML(e.message) + '</div>';
+    return;
+  }
+  document.getElementById('nxLoading').hidden = true;
+  document.getElementById('nxContent').hidden = false;
+}
+
+function nxPopulateMotoristaSelect() {
+  var names = new Set();
+  nxData.cargas.forEach(function(c){ if (c.motorista_nome) names.add(c.motorista_nome); });
+  nxData.jornada.forEach(function(j){ if (j.nome) names.add(j.nome); });
+  var sel = document.getElementById('nxFiltroMotorista');
+  var current = sel.value;
+  var arr = Array.from(names).sort();
+  sel.innerHTML = '<option value="">Todos</option>' + arr.map(function(n){ return '<option value="'+escHTML(n)+'">'+escHTML(n)+'</option>'; }).join('');
+  if (arr.indexOf(current) !== -1) sel.value = current;
+}
+
+// ── Helpers de correlação (por nome + mês; nunca afirmamos vínculo direto de viagem) ──
+function nxMesDaCarga(c) {
+  if (!c.data_programada) return null;
+  var idx = parseInt(c.data_programada.substring(5,7), 10) - 1;
+  return MESES[idx] || null;
+}
+function nxFiltroAtual() {
+  return {
+    mes: document.getElementById('nxFiltroMes').value,
+    motorista: document.getElementById('nxFiltroMotorista').value
+  };
+}
+function nxCargasFiltradas() {
+  var f = nxFiltroAtual();
+  return nxData.cargas.filter(function(c) {
+    if (f.motorista && c.motorista_nome !== f.motorista) return false;
+    if (f.mes && nxMesDaCarga(c) !== f.mes) return false;
+    return true;
+  });
+}
+function nxJornadaFiltrada() {
+  var f = nxFiltroAtual();
+  return nxData.jornada.filter(function(j) {
+    if (f.motorista && j.nome !== f.motorista) return false;
+    if (f.mes && j.mes !== f.mes) return false;
+    return true;
+  });
+}
+function nxNCFiltrada() {
+  var f = nxFiltroAtual();
+  return nxData.nc.filter(function(n) {
+    if (f.motorista && n.nome !== f.motorista) return false;
+    if (f.mes && n.mes !== f.mes) return false;
+    return true;
+  });
+}
+function nxMultasFiltradas() {
+  var f = nxFiltroAtual();
+  return nxData.multas.filter(function(m) {
+    if (f.motorista && m.motorista !== f.motorista) return false;
+    if (f.mes && m.mes !== f.mes) return false;
+    return true;
+  });
+}
+function nxCombFiltrado() {
+  var f = nxFiltroAtual();
+  return nxData.comb.filter(function(c) {
+    if (f.motorista && c.motorista !== f.motorista) return false;
+    if (f.mes && c.mes !== f.mes) return false;
+    return true;
+  });
+}
+
+// ── Atualiza o dropdown de meses conforme populate a cada mês com atividade ──
+function nxPopulateMesSelect() {
+  var sel = document.getElementById('nxFiltroMes');
+  var current = sel.value;
+  var comData = new Set();
+  nxData.cargas.forEach(function(c){ var m=nxMesDaCarga(c); if(m) comData.add(m); });
+  nxData.jornada.forEach(function(j){ if(j.mes) comData.add(j.mes); });
+  sel.innerHTML = '<option value="">Todos os meses</option>' + MESES.filter(function(m){ return comData.has(m); })
+    .map(function(m){ return '<option value="'+m+'">'+m+'</option>'; }).join('');
+  if (comData.has(current)) sel.value = current;
+}
+
+// ══════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════
+function nxRender() {
+  nxPopulateMesSelect();
+  var cargas = nxCargasFiltradas();
+  var jornada = nxJornadaFiltrada();
+  var nc = nxNCFiltrada();
+  var multas = nxMultasFiltradas();
+  var comb = nxCombFiltrado();
+
+  nxRenderKPIs(cargas, jornada, nc, multas, comb);
+  nxRenderAlerts(jornada, nc, multas, comb);
+  nxRenderRanking(jornada, nc, multas);
+  nxRenderAnomalias();
+  nxRenderOperacoes(cargas, jornada);
+  nxRenderCharts();
+  nxRenderCargasTable(cargas);
+}
+
+function nxRenderKPIs(cargas, jornada, nc, multas, comb) {
+  var motoristasSet = new Set();
+  cargas.forEach(function(c){ if(c.motorista_nome) motoristasSet.add(c.motorista_nome); });
+  jornada.forEach(function(j){ if(j.nome) motoristasSet.add(j.nome); });
+
+  var totalHE = jornada.reduce(function(s,j){ return s + (Number(j.h50)||0) + (Number(j.h100)||0); }, 0);
+  var totalNC = nc.reduce(function(s,n){ return s + (Number(n.total)||0); }, 0) + jornada.reduce(function(s,j){ return s+(Number(j.nc)||0); },0);
+  var totalMultasValor = multas.reduce(function(s,m){ return s + (Number(m.valor)||0); }, 0);
+  var mediaComb = comb.length ? (comb.reduce(function(s,c){ return s+(Number(c.media_km_litro)||0); },0) / comb.length) : 0;
+
+  var kpis = [
+    { label:'Viagens (Cargas)', value: cargas.length, color:'#818cf8', sub: cargas.length ? '' : 'Sem cargas no período' },
+    { label:'Motoristas Envolvidos', value: motoristasSet.size, color:'#22c55e' },
+    { label:'Horas Extras (H50+H100)', value: fmtH(totalHE), color:'#f59e0b' },
+    { label:'Não Conformidades', value: totalNC, color:'#ff4757' },
+    { label:'Multas (Período)', value: multas.length, color:'#f43f5e', sub: fmtBRL(totalMultasValor) },
+    { label:'Média Combustível', value: mediaComb ? mediaComb.toFixed(2)+' km/l' : '—', color:'#fb923c' },
+  ];
+  document.getElementById('nxKpiGrid').innerHTML = kpis.map(function(k) {
+    return '<div class="nx-kpi" style="--kpi-color:'+k.color+'"><div class="nx-kpi-label">'+k.label+'</div>'
+      + '<div class="nx-kpi-value">'+k.value+'</div>'
+      + (k.sub ? '<div class="nx-kpi-sub">'+k.sub+'</div>' : '') + '</div>';
+  }).join('');
+}
+
+function nxRenderAlerts(jornada, nc, multas, comb) {
+  var alerts = [];
+
+  // HE alta (limite ajustável: >20h no mês por motorista)
+  var byNome = {};
+  jornada.forEach(function(j) {
+    var tot = (Number(j.h50)||0) + (Number(j.h100)||0);
+    byNome[j.nome] = (byNome[j.nome]||0) + tot;
+  });
+  Object.keys(byNome).forEach(function(nome) {
+    if (byNome[nome] > 20) {
+      alerts.push({ level:'crit', icon:'🔴', text:'<b>'+escHTML(nome)+'</b> acumulou '+fmtH(byNome[nome])+' de hora extra no período.', meta:'Alta incidência de HE' });
+    }
+  });
+
+  // N/C reincidente (>=3 no período por motorista)
+  var ncPorNome = {};
+  nc.forEach(function(n) { ncPorNome[n.nome] = (ncPorNome[n.nome]||0) + (Number(n.total)||0); });
+  Object.keys(ncPorNome).forEach(function(nome) {
+    if (ncPorNome[nome] >= 3) {
+      alerts.push({ level:'warn', icon:'🟠', text:'<b>'+escHTML(nome)+'</b> apresentou '+ncPorNome[nome]+' não conformidades no período.', meta:'Reincidência de N/C' });
+    }
+  });
+
+  // Multas com valor alto (>500 cada)
+  multas.forEach(function(m) {
+    if (Number(m.valor) > 500) {
+      alerts.push({ level:'warn', icon:'🟠', text:'Multa de '+fmtBRL(m.valor)+' para <b>'+escHTML(m.motorista||'motorista não identificado')+'</b> ('+escHTML(m.tipo_infracao||'infração')+').', meta:'Custo elevado de multa' });
+    }
+  });
+
+  // Combustível abaixo da média geral
+  if (comb.length > 1) {
+    var media = comb.reduce(function(s,c){ return s+(Number(c.media_km_litro)||0); },0) / comb.length;
+    comb.forEach(function(c) {
+      var v = Number(c.media_km_litro) || 0;
+      if (media > 0 && v > 0 && v < media * 0.75) {
+        alerts.push({ level:'warn', icon:'🟡', text:'<b>'+escHTML(c.motorista||'—')+'</b> com média de '+v.toFixed(2)+' km/l, abaixo da média da frota ('+media.toFixed(2)+' km/l).', meta:'Queda de aproveitamento' });
+      }
+    });
+  }
+
+  var el = document.getElementById('nxAlerts');
+  if (!alerts.length) { el.innerHTML = '<div class="nx-empty">Nenhum alerta identificado para os filtros atuais. ✅</div>'; return; }
+  el.innerHTML = alerts.slice(0,12).map(function(a) {
+    return '<div class="nx-alert '+a.level+'"><span class="dot">'+a.icon+'</span><div>'+a.text+'<div class="meta">'+a.meta+'</div></div></div>';
+  }).join('');
+}
+
+function nxRenderRanking(jornada, nc, multas) {
+  // Score simples: HE*1 + NC*10 + Multas*15 — quanto maior, maior o impacto negativo na jornada
+  var score = {};
+  jornada.forEach(function(j) {
+    score[j.nome] = (score[j.nome]||0) + ((Number(j.h50)||0)+(Number(j.h100)||0));
+  });
+  nc.forEach(function(n) { score[n.nome] = (score[n.nome]||0) + (Number(n.total)||0) * 10; });
+  multas.forEach(function(m) { if(m.motorista) score[m.motorista] = (score[m.motorista]||0) + 15; });
+
+  var arr = Object.keys(score).map(function(nome){ return { nome:nome, score:score[nome] }; })
+    .filter(function(x){ return x.score > 0; })
+    .sort(function(a,b){ return b.score - a.score; })
+    .slice(0, 8);
+
+  var el = document.getElementById('nxRanking');
+  if (!arr.length) { el.innerHTML = '<div class="nx-empty">Sem dados suficientes para ranquear no período.</div>'; return; }
+  el.innerHTML = arr.map(function(x, i) {
+    var color = x.score > 40 ? '#ff4757' : (x.score > 20 ? '#facc15' : '#00d68f');
+    return '<div class="nx-rank-row"><div class="nx-rank-pos">'+(i+1)+'</div><div class="nx-rank-name">'+escHTML(x.nome)+'</div><div class="nx-rank-score" style="color:'+color+'">'+x.score.toFixed(0)+'</div></div>';
+  }).join('') + '<div style="font-size:10.5px;color:var(--gray-3);margin-top:10px">Índice combinado (HE + N/C + Multas) — uso apenas para gestão, não punitivo.</div>';
+}
+
+function nxRenderAnomalias() {
+  var motoristaFiltro = document.getElementById('nxFiltroMotorista').value;
+  var mesFiltro = document.getElementById('nxFiltroMes').value;
+
+  // Sempre olha o ano inteiro carregado (precisa de vários meses pra calcular uma média histórica de verdade)
+  var jornadaAno = nxData.jornada.filter(function(j){ return !motoristaFiltro || j.nome===motoristaFiltro; });
+  var ncAno = nxData.nc.filter(function(n){ return !motoristaFiltro || n.nome===motoristaFiltro; });
+  var combAno = nxData.comb.filter(function(c){ return !motoristaFiltro || c.motorista===motoristaFiltro; });
+
+  // Mês de referência: o filtrado, ou o mês mais recente que tiver dados
+  var mesRef = mesFiltro || nxMesMaisRecenteComDados(jornadaAno);
+  if (!mesRef) { document.getElementById('nxAnomalias').innerHTML = '<div class="nx-empty">Sem meses suficientes no ano para calcular uma média histórica.</div>'; return; }
+
+  var anomalias = [];
+
+  // ── HE por motorista: média histórica (excluindo o mês de referência) vs mês de referência ──
+  var nomes = new Set(); jornadaAno.forEach(function(j){ if(j.nome) nomes.add(j.nome); });
+  nomes.forEach(function(nome) {
+    var registros = jornadaAno.filter(function(j){ return j.nome===nome; });
+    var historico = registros.filter(function(j){ return j.mes !== mesRef; });
+    var atual = registros.find(function(j){ return j.mes === mesRef; });
+    if (!atual || historico.length < 2) return; // precisa de pelo menos 2 meses de histórico pra ser confiável
+    var valorAtual = (Number(atual.h50)||0) + (Number(atual.h100)||0);
+    var media = historico.reduce(function(s,j){ return s+(Number(j.h50)||0)+(Number(j.h100)||0); }, 0) / historico.length;
+    if (media < 1) return; // evita divisão por valores irrelevantes
+    var variacao = ((valorAtual - media) / media) * 100;
+    if (Math.abs(variacao) >= 40) {
+      anomalias.push({
+        tipo:'Horas Extras', nome:nome, media:media, atual:valorAtual, variacao:variacao,
+        unidade:'h', mes:mesRef
+      });
+    }
+  });
+
+  // ── N/C por motorista ──
+  var nomesNc = new Set(); ncAno.forEach(function(n){ if(n.nome) nomesNc.add(n.nome); });
+  nomesNc.forEach(function(nome) {
+    var registros = ncAno.filter(function(n){ return n.nome===nome; });
+    var historico = registros.filter(function(n){ return n.mes !== mesRef; });
+    var atual = registros.find(function(n){ return n.mes === mesRef; });
+    if (!atual || historico.length < 2) return;
+    var valorAtual = Number(atual.total) || 0;
+    var media = historico.reduce(function(s,n){ return s+(Number(n.total)||0); }, 0) / historico.length;
+    if (media < 0.5) return;
+    var variacao = ((valorAtual - media) / media) * 100;
+    if (Math.abs(variacao) >= 40) {
+      anomalias.push({ tipo:'Não Conformidades', nome:nome, media:media, atual:valorAtual, variacao:variacao, unidade:'', mes:mesRef });
+    }
+  });
+
+  // ── Eficiência de combustível (km/l) — queda é o que importa aqui ──
+  var nomesComb = new Set(); combAno.forEach(function(c){ if(c.motorista) nomesComb.add(c.motorista); });
+  nomesComb.forEach(function(nome) {
+    var registros = combAno.filter(function(c){ return c.motorista===nome; });
+    var historico = registros.filter(function(c){ return c.mes !== mesRef; });
+    var atual = registros.find(function(c){ return c.mes === mesRef; });
+    if (!atual || historico.length < 2) return;
+    var valorAtual = Number(atual.media_km_litro) || 0;
+    var media = historico.reduce(function(s,c){ return s+(Number(c.media_km_litro)||0); }, 0) / historico.length;
+    if (media < 0.5 || valorAtual < 0.5) return;
+    var variacao = ((valorAtual - media) / media) * 100;
+    if (variacao <= -25) { // só alerta queda de eficiência, não alta (alta não é problema)
+      anomalias.push({ tipo:'Eficiência Combustível', nome:nome, media:media, atual:valorAtual, variacao:variacao, unidade:'km/l', mes:mesRef });
+    }
+  });
+
+  anomalias.sort(function(a,b){ return Math.abs(b.variacao) - Math.abs(a.variacao); });
+
+  var el = document.getElementById('nxAnomalias');
+  if (!anomalias.length) {
+    el.innerHTML = '<div class="nx-empty">Nenhuma anomalia estatística identificada em '+mesRef+' comparado ao histórico do ano. ✅</div>';
+    return;
+  }
+  el.innerHTML = anomalias.slice(0,10).map(function(a) {
+    var alta = a.variacao > 0;
+    var cor = Math.abs(a.variacao) >= 80 ? '#ff4757' : '#facc15';
+    var seta = alta ? '▲' : '▼';
+    return '<div style="display:flex;align-items:center;gap:12px;padding:10px 13px;border-radius:10px;margin-bottom:8px;background:'+cor+'12;border:1px solid '+cor+'33">'
+      + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:800;color:'+cor+';min-width:64px;text-align:center">'+seta+' '+Math.abs(a.variacao).toFixed(0)+'%</div>'
+      + '<div style="flex:1">'
+      +   '<div style="font-size:12.5px;font-weight:700">'+escHTML(a.nome)+' <span style="color:var(--gray-3);font-weight:500">— '+a.tipo+'</span></div>'
+      +   '<div style="font-size:11px;color:var(--gray-3);margin-top:2px">Média histórica: '+a.media.toFixed(1)+a.unidade+' • '+a.mes+': '+a.atual.toFixed(1)+a.unidade+'</div>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function nxRenderOperacoes(cargas, jornada) {
+  var porMotorista = {};
+  cargas.forEach(function(c) {
+    var nome = c.motorista_nome || 'Não informado';
+    if (!porMotorista[nome]) porMotorista[nome] = { cargas: 0, clientes: {}, rotas: {} };
+    porMotorista[nome].cargas++;
+
+    var paradas = (nxData.paradas || []).filter(function(p){ return String(p.carga_id) === String(c.id); });
+    var origem = paradas.find(function(p){ return p.tipo === 'coleta'; });
+    var destino = [].concat(paradas).reverse().find(function(p){ return p.tipo === 'entrega'; });
+
+    var clienteChave = origem ? (origem.local_nome || origem.cidade || null) : null;
+    if (clienteChave) porMotorista[nome].clientes[clienteChave] = (porMotorista[nome].clientes[clienteChave] || 0) + 1;
+
+    var rotaChave = (origem ? (origem.cidade || origem.local_nome || '—') : '—') + ' → ' + (destino ? (destino.cidade || destino.local_nome || '—') : '—');
+    if (origem || destino) porMotorista[nome].rotas[rotaChave] = (porMotorista[nome].rotas[rotaChave] || 0) + 1;
+  });
+
+  function maisFrequente(obj) {
+    var chaves = Object.keys(obj);
+    if (!chaves.length) return null;
+    chaves.sort(function(a,b){ return obj[b]-obj[a]; });
+    return { nome: chaves[0], qtd: obj[chaves[0]] };
+  }
+
+  var linhas = Object.keys(porMotorista).map(function(nome) {
+    var d = porMotorista[nome];
+    var cliente = maisFrequente(d.clientes);
+    var rota = maisFrequente(d.rotas);
+    var heRegistro = jornada.filter(function(j){ return j.nome === nome; })
+      .reduce(function(s,j){ return s+(Number(j.h50)||0)+(Number(j.h100)||0); }, 0);
+    return { nome: nome, cargas: d.cargas, cliente: cliente, rota: rota, he: heRegistro };
+  }).sort(function(a,b){ return b.cargas - a.cargas; });
+
+  var body = document.getElementById('nxOperacaoBody');
+  if (!linhas.length) {
+    body.innerHTML = '<tr><td colspan="5" class="nx-empty">Nenhuma carga encontrada para os filtros selecionados.</td></tr>';
+    return;
+  }
+  body.innerHTML = linhas.map(function(l) {
+    var heCor = l.he > 20 ? '#ff4757' : (l.he > 10 ? '#facc15' : '#00d68f');
+    return '<tr>'
+      + '<td style="font-weight:700">' + escHTML(l.nome) + '</td>'
+      + '<td>' + l.cargas + '</td>'
+      + '<td>' + (l.cliente ? escHTML(l.cliente.nome) + ' <span style="color:var(--gray-3);font-size:11px">(' + l.cliente.qtd + 'x)</span>' : '<span style="color:var(--gray-3)">Não identificado</span>') + '</td>'
+      + '<td>' + (l.rota ? escHTML(l.rota.nome) + ' <span style="color:var(--gray-3);font-size:11px">(' + l.rota.qtd + 'x)</span>' : '<span style="color:var(--gray-3)">Não identificada</span>') + '</td>'
+      + '<td style="font-weight:700;color:' + heCor + '">' + fmtH(l.he) + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+function nxMesMaisRecenteComDados(jornadaAno) {
+  for (var i = MESES.length - 1; i >= 0; i--) {
+    if (jornadaAno.some(function(j){ return j.mes === MESES[i]; })) return MESES[i];
+  }
+  return null;
+}
+
+var _nxChartHE=null, _nxChartNC=null;
+function nxRenderCharts() {
+  var motoristaFiltro = document.getElementById('nxFiltroMotorista').value;
+  var jornadaBase = nxData.jornada.filter(function(j){ return !motoristaFiltro || j.nome===motoristaFiltro; });
+  var ncBase = nxData.nc.filter(function(n){ return !motoristaFiltro || n.nome===motoristaFiltro; });
+
+  var heByMonth = MESES.map(function(m) {
+    return jornadaBase.filter(function(j){ return j.mes===m; }).reduce(function(s,j){ return s+(Number(j.h50)||0)+(Number(j.h100)||0); }, 0);
+  });
+  var ncByMonth = MESES.map(function(m) {
+    return ncBase.filter(function(n){ return n.mes===m; }).reduce(function(s,n){ return s+(Number(n.total)||0); }, 0);
+  });
+
+  var ctxHE = document.getElementById('nxChartHE').getContext('2d');
+  if (_nxChartHE) _nxChartHE.destroy();
+  _nxChartHE = new Chart(ctxHE, {
+    type:'bar',
+    data:{ labels: MESES_CURTO, datasets:[{ label:'Horas Extras', data: heByMonth, backgroundColor:'#818cf8', borderRadius:5 }] },
+    options:{ plugins:{legend:{display:false}}, scales:{ x:{ ticks:{color:'#7c8bc0'}, grid:{color:'rgba(255,255,255,0.05)'} }, y:{ ticks:{color:'#7c8bc0'}, grid:{color:'rgba(255,255,255,0.05)'} } } }
+  });
+
+  var ctxNC = document.getElementById('nxChartNC').getContext('2d');
+  if (_nxChartNC) _nxChartNC.destroy();
+  _nxChartNC = new Chart(ctxNC, {
+    type:'bar',
+    data:{ labels: MESES_CURTO, datasets:[{ label:'N/C', data: ncByMonth, backgroundColor:'#ff4757', borderRadius:5 }] },
+    options:{ plugins:{legend:{display:false}}, scales:{ x:{ ticks:{color:'#7c8bc0'}, grid:{color:'rgba(255,255,255,0.05)'} }, y:{ ticks:{color:'#7c8bc0'}, grid:{color:'rgba(255,255,255,0.05)'} } } }
+  });
+}
+
+function nxCargaStatusBadge(status) {
+  var map = {
+    'programada': ['neutral','Programada'], 'em_transito':['warn','Em trânsito'],
+    'entregue':['ok','Entregue'], 'cancelada':['crit','Cancelada']
+  };
+  var m = map[status] || ['neutral', status || '—'];
+  return '<span class="nx-badge '+m[0]+'">'+escHTML(m[1])+'</span>';
+}
+
+function nxOrigemDestino(cargaId) {
+  var paradas = (nxData.paradas||[]).filter(function(p){ return String(p.carga_id)===String(cargaId); });
+  if (!paradas.length) return '<span style="color:var(--gray-3)">Informação não disponível</span>';
+  var origem = paradas.find(function(p){ return p.tipo==='coleta'; });
+  var destino = [].concat(paradas).reverse().find(function(p){ return p.tipo==='entrega'; });
+  var o = origem ? (origem.cidade || origem.local_nome || '—') : '—';
+  var d = destino ? (destino.cidade || destino.local_nome || '—') : '—';
+  return escHTML(o) + ' → ' + escHTML(d);
+}
+
+function nxSituacaoCarga(carga) {
+  // Correlação por nome + mês (não é vínculo garantido de mesma viagem — apenas indicativo do período)
+  var mes = nxMesDaCarga(carga);
+  var ncDoMotoristaMes = nxData.nc.filter(function(n){ return n.nome===carga.motorista_nome && n.mes===mes; })
+    .reduce(function(s,n){ return s+(Number(n.total)||0); }, 0);
+  if (ncDoMotoristaMes >= 2) return '<span class="nx-badge crit">🔴 Atenção</span>';
+  if (ncDoMotoristaMes === 1) return '<span class="nx-badge warn">🟡 Observar</span>';
+  return '<span class="nx-badge ok">🟢 OK</span>';
+}
+
+function nxRenderCargasTable(cargas) {
+  var body = document.getElementById('nxCargasBody');
+  if (!cargas.length) {
+    body.innerHTML = '<tr><td colspan="7" class="nx-empty">Nenhuma viagem/carga encontrada para os filtros selecionados.</td></tr>';
+    return;
+  }
+  body.innerHTML = cargas.map(function(c) {
+    var veiculo = c.placa_cavalo || '—';
+    return '<tr onclick="nxOpenViagem(\''+c.id+'\')">'
+      + '<td>'+escHTML(c.numero||'—')+'</td>'
+      + '<td>'+escHTML(c.motorista_nome||'—')+'</td>'
+      + '<td>'+escHTML(veiculo)+'</td>'
+      + '<td>'+(c.data_programada ? c.data_programada.split('-').reverse().join('/') : '—')+'</td>'
+      + '<td>'+nxCargaStatusBadge(c.status)+'</td>'
+      + '<td>'+nxOrigemDestino(c.id)+'</td>'
+      + '<td>'+nxSituacaoCarga(c)+'</td>'
+      + '</tr>';
+  }).join('');
+}
+
+// ── Painel da Viagem (drill-down) ──
+function nxOpenViagem(cargaId) {
+  var carga = nxData.cargas.find(function(c){ return String(c.id) === String(cargaId); });
+  if (!carga) return;
+  var mes = nxMesDaCarga(carga);
+  var jornadaMotorista = nxData.jornada.find(function(j){ return j.nome===carga.motorista_nome && j.mes===mes; });
+  var ncMotorista = nxData.nc.filter(function(n){ return n.nome===carga.motorista_nome && n.mes===mes; })
+    .reduce(function(s,n){ return s+(Number(n.total)||0); }, 0);
+  var multasMotorista = nxData.multas.filter(function(m){ return m.motorista===carga.motorista_nome && m.mes===mes; });
+  var combMotorista = nxData.comb.find(function(c){ return c.motorista===carga.motorista_nome && c.mes===mes; });
+
+  var paradas = (nxData.paradas||[]).filter(function(p){ return String(p.carga_id)===String(cargaId); });
+  var timelineHTML = paradas.length
+    ? paradas.map(function(p) {
+        var label = (p.tipo==='coleta' ? '📤 Coleta' : '📥 Entrega') + ' — ' + escHTML(p.local_nome||p.cidade||'local não informado');
+        var data = p.data_prevista ? p.data_prevista.split('-').reverse().join('/') : 'data não informada';
+        return '<div class="nx-timeline-step"><span class="nx-timeline-dot"></span>'+label+'<span class="dim" style="margin-left:auto;font-size:11px">'+data+'</span></div>';
+      }).join('')
+    : '<div class="nx-timeline-step dim">Informação não disponível.</div>';
+
+  var heTotal = jornadaMotorista ? (Number(jornadaMotorista.h50)||0)+(Number(jornadaMotorista.h100)||0) : null;
+  var custoMultas = multasMotorista.reduce(function(s,m){ return s+(Number(m.valor)||0); }, 0);
+
+  var html = ''
+    + '<div class="nx-modal-bg" onclick="if(event.target===this) nxCloseModal()">'
+    + '<div class="nx-modal">'
+    + '<button class="nx-modal-close" onclick="nxCloseModal()">✕ Fechar</button>'
+    + '<h2 style="font-family:\'Barlow Condensed\',sans-serif;font-size:19px;margin-bottom:4px">Viagem '+escHTML(carga.numero||'#'+carga.id)+'</h2>'
+    + '<p style="font-size:11px;color:var(--gray-3);margin-bottom:14px">Dados cruzados por motorista + período (' + (mes||'mês não identificado') + ') — correlação indicativa, não um vínculo direto de sistema.</p>'
+
+    + '<div class="nx-kv">'
+    +   '<div><b>Motorista</b>'+escHTML(carga.motorista_nome||'—')+'</div>'
+    +   '<div><b>Responsável Programação</b>'+escHTML(carga.responsavel_programacao||'—')+'</div>'
+    +   '<div><b>Veículo</b>'+escHTML(carga.placa_cavalo||'—')+(carga.placa_carreta1?' / '+escHTML(carga.placa_carreta1):'')+'</div>'
+    +   '<div><b>Status</b>'+nxCargaStatusBadge(carga.status)+'</div>'
+    +   '<div><b>Peso Total</b>'+(carga.peso_total ? Number(carga.peso_total).toLocaleString('pt-BR')+' kg' : 'Informação não disponível')+'</div>'
+    +   '<div><b>Valor do Frete</b>'+(carga.valor_frete ? fmtBRL(carga.valor_frete) : 'Informação não disponível')+'</div>'
+    + '</div>'
+
+    + '<div class="nx-section-title" style="margin:16px 0 6px;font-size:13px">🧭 Linha do Tempo</div>'
+    + '<div class="nx-timeline">' + timelineHTML + '</div>'
+
+    + '<div class="nx-section-title" style="margin:16px 0 6px;font-size:13px">📋 Jornada &amp; Conformidade (mesmo período)</div>'
+    + '<div class="nx-kv">'
+    +   '<div><b>Horas Extras (H50+H100)</b>'+(heTotal!==null ? fmtH(heTotal) : 'Informação não disponível')+'</div>'
+    +   '<div><b>Não Conformidades</b>'+(ncMotorista||'0')+'</div>'
+    +   '<div><b>Multas no Período</b>'+(multasMotorista.length ? multasMotorista.length+' ('+fmtBRL(custoMultas)+')' : 'Nenhuma')+'</div>'
+    +   '<div><b>Média Combustível</b>'+(combMotorista ? Number(combMotorista.media_km_litro).toFixed(2)+' km/l' : 'Informação não disponível')+'</div>'
+    + '</div>'
+
+    + (carga.observacoes ? '<div class="nx-section-title" style="margin:16px 0 6px;font-size:13px">Observações</div><p style="font-size:12.5px;color:var(--gray-2)">'+escHTML(carga.observacoes)+'</p>' : '')
+
+    + '</div></div>';
+
+  document.getElementById('nxModalRoot').innerHTML = html;
+}
+function nxCloseModal() { document.getElementById('nxModalRoot').innerHTML = ''; }
+
+document.addEventListener('DOMContentLoaded', nxInit);
+</script>
+</body>
+</html>
